@@ -1,5 +1,6 @@
 import { generate } from "random-words";
 import axios from "axios";
+import _, { mean } from "lodash";
 
 type LanguageType =
   | "en"
@@ -17,6 +18,24 @@ type wordType = {
   word: string;
   meaning: string;
   options: string[];
+};
+
+const generateMCQOptions = (
+  meaning: { Text: string }[],
+  index: number
+): string[] => {
+  const correctAnswer = meaning[index].Text;
+  const allMeaningExceptForCorrect = meaning.filter(
+    (i) => i.Text !== correctAnswer
+  );
+  const incorrectAnswers: string[] = _.sampleSize(
+    allMeaningExceptForCorrect,
+    3
+  ).map((i) => i.Text);
+
+  const generateMCQOptions = _.shuffle([...incorrectAnswers, correctAnswer]);
+
+  return generateMCQOptions;
 };
 
 export const translateWords = async (
@@ -45,15 +64,35 @@ export const translateWords = async (
     const response = await axios.request(options);
     console.log(response.data);
     const result: wordType[] = response.data.trans.map(
-      (item: any, index: number) => ({
-        word: words[index].text,
-        meaning: item.text,
-        options: ["sample"],
-      })
+      (item: any, index: number) => {
+        const options: string[] = generateMCQOptions(words, index);
+
+        return {
+          word: words[index].text,
+          meaning: item.text,
+          options,
+        };
+      }
     );
     return result;
   } catch (error) {
     console.error(error);
     throw new Error("Translation failed " + error);
   }
+};
+
+export const countMatchedAnswers = (arr1: string[], arr2: string[]): number => {
+  if (arr1.length !== arr2.length) {
+    throw new Error("Arrays must be of the same length");
+  }
+
+  let matchingCount = 0;
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] === arr2[i]) {
+      matchingCount++;
+    }
+  }
+
+  return matchingCount;
 };
