@@ -1,73 +1,114 @@
-# React + TypeScript + Vite
+🚀 LinguaFlow — Learn & Quiz Languages
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> A lightweight React + TypeScript app (Vite) to learn words, review meanings, and take quick quizzes.
 
-Currently, two official plugins are available:
+✨ Built for fast learning sessions with an approachable UI, progress tracking, and quiz results saved to Redux.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🧭 App Flow (Code + UX)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Home → Learning → Quiz → Results
+- The core data flow:
+  - `translateWords()` (in `src/utils/features.ts`) fetches/translates the word list and dispatches `getWordsSuccess`.
+  - Words are stored in Redux under the `root` slice (`src/redux/slices.ts`) as `state.root.words`.
+  - `Learning` (`src/components/Learning.tsx`) renders flashcards and navigates to `/quiz`.
+  - `Quiz` (`src/components/Quiz.tsx`) reads `words` from Redux and records chosen answers into `state.root.result` via the `saveResult` action.
+  - `Result` (`src/components/Result.tsx`) reads `result` and `words` to calculate score and show feedback.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🧩 Key Files & Where To Look
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Pages / Components**
+  - `src/components/Learning.tsx` — learning flashcards and starting the quiz
+  - `src/components/Quiz.tsx` — quiz UI, choices, progress, submit
+  - `src/components/Result.tsx` — results screen and score
+  - `src/components/Home.tsx` — landing and navigation
+- **State / Store**
+  - `src/redux/slices.ts` — Redux slice (`getWordsRequest`, `getWordsSuccess`, `saveResult`, `clearState`)
+  - `src/redux/store.ts` — store configuration
+- **Utilities**
+  - `src/utils/features.ts` — translation / data generation logic
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## ✨ Features
+
+- Progressive learning cards with next/back controls
+- Start a quiz based on learned words
+- Multiple-choice options generated per word
+- Progress bar and per-question progress count
+- Results saved to Redux and viewable in `Result` page
+
+---
+
+## 🧰 Tech Stack
+
+- React + TypeScript
+- Vite (dev server + build)
+- Redux Toolkit for state management
+- Tailwind CSS + component UI primitives
+
+---
+
+## ⚙️ Run Locally
+
+Install dependencies:
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Start dev server:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Preview production build locally:
+
+```bash
+npm run preview
+```
+
+---
+
+## 🛠 Development Notes
+
+- If `Quiz` shows "No quiz data found" make sure you navigate from `Learning` after words are loaded — the app expects the translated `words` to be present in Redux. If needed, avoid dispatching `clearState()` on unmount of `Learning` so the quiz can access words after navigation.
+- Words shape (see `src/redux/slices.ts`):
+
+```ts
+type wordType = {
+  word: string;
+  meaning: string;
+  options: string[];
+};
+```
+
+- Results are stored as `string[]` (selected options) in `state.root.result`.
+
+---
+
+## ✅ Tips & Troubleshooting
+
+- Browser Console: use console logs in `Quiz.tsx` to inspect `words` and ensure they are non-empty.
+- If navigating directly to `/quiz` without visiting `Learning`, the app may have no words — either seed words on app startup or persist state between routes.
+- To reset the app state, call `clearState()` (e.g., on logout) which clears `words` and `result`.
+
+---
+
+## ❤️ Contributing
+
+PRs welcome — open an issue or submit a PR for bugs, feature requests, or documentation improvements.
+
+---
+
+Made with ❤️ and lots of coffee ☕ — happy learning! 🎧📚🧠

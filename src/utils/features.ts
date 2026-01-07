@@ -1,84 +1,62 @@
 import { generate } from "random-words";
 import axios from "axios";
 import _, { mean } from "lodash";
+import type { LanguageCode, Word } from "../types/language";
 
-type LanguageType =
-  | "en"
-  | "es"
-  | "fr"
-  | "de"
-  | "zh"
-  | "ja"
-  | "ru"
-  | "ar"
-  | "hi"
-  | "pt";
-
-type wordType = {
-  word: string;
-  meaning: string;
-  options: string[];
-};
-
-const generateMCQOptions = (
-  meaning: { Text: string }[],
-  index: number
-): string[] => {
-  const correctAnswer = meaning[index].Text;
-  const allMeaningExceptForCorrect = meaning.filter(
-    (i) => i.Text !== correctAnswer
-  );
-  const incorrectAnswers: string[] = _.sampleSize(
-    allMeaningExceptForCorrect,
-    3
-  ).map((i) => i.Text);
-
-  const generateMCQOptions = _.shuffle([...incorrectAnswers, correctAnswer]);
-
-  return generateMCQOptions;
-};
-
-export const translateWords = async (
-  params: LanguageType
-): Promise<wordType[]> => {
+export const translateWords = async (params: LanguageCode): Promise<Word[]> => {
   try {
     const generatedWords = generate(10);
-    const words = (
-      Array.isArray(generatedWords) ? generatedWords : [generatedWords]
-    ).map((word: any) => ({ text: word }));
+    const wordsArray = Array.isArray(generatedWords)
+      ? generatedWords
+      : [generatedWords];
 
-    const options = {
-      method: "POST",
-      url: import.meta.env.VITE_RAPID_API_GOOGLE_TRANSLATE_URL,
-      headers: {
-        "x-rapidapi-key": import.meta.env.VITE_RAPID_API_KEY,
-        "x-rapidapi-host": import.meta.env.VITE_RAPID_API_HOST,
-        "Content-Type": "application/json",
-      },
-      data: {
+    const requestPayload = wordsArray.map((word) => ({ text: word }));
+
+    const response = await axios.post(
+      import.meta.env.VITE_RAPID_API_GOOGLE_TRANSLATE_URL,
+      {
         from: "auto",
         to: params,
-        json: words,
+        json: requestPayload,
       },
-    };
-    const response = await axios.request(options);
-    console.log(response.data);
-    const result: wordType[] = response.data.trans.map(
-      (item: any, index: number) => {
-        const options: string[] = generateMCQOptions(words, index);
-
-        return {
-          word: words[index].text,
-          meaning: item.text,
-          options,
-        };
+      {
+        headers: {
+          "x-rapidapi-key": import.meta.env.VITE_RAPID_API_KEY,
+          "x-rapidapi-host": import.meta.env.VITE_RAPID_API_HOST,
+          "Content-Type": "application/json",
+        },
       }
     );
+
+    const translatedTexts: string[] = response.data.trans.map(
+      (item: any) => item.text
+    );
+
+    const result: Word[] = wordsArray.map((word, index) => ({
+      word,
+      meaning: translatedTexts[index],
+      options: generateMCQOptions(translatedTexts, index),
+    }));
+
     return result;
   } catch (error) {
     console.error(error);
-    throw new Error("Translation failed " + error);
+    throw new Error("Translation failed");
   }
+};
+
+const generateMCQOptions = (
+  meanings: string[],
+  correctIndex: number
+): string[] => {
+  const correctAnswer = meanings[correctIndex];
+
+  const incorrectAnswers = _.sampleSize(
+    meanings.filter((_, i) => i !== correctIndex),
+    3
+  );
+
+  return _.shuffle([...incorrectAnswers, correctAnswer]);
 };
 
 export const countMatchedAnswers = (arr1: string[], arr2: string[]): number => {

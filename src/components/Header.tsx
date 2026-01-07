@@ -1,82 +1,79 @@
-import { Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import { GraduationCap } from "lucide-react";
+
+const navLinks = [
+  { name: "Home", path: "/" },
+  { name: "Learning", path: "/learning" },
+  { name: "Quiz", path: "/quiz" },
+  { name: "Results", path: "/result" },
+];
 
 const Header = () => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   return (
-    <header className="bg-white/60 backdrop-blur sticky top-0 z-40 border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-md bg-gradient-to-r from-indigo-500 to-pink-500 flex items-center justify-center text-white font-semibold">
-                L
-              </div>
-              <span className="font-semibold text-lg text-gray-900">
-                Learningo
-              </span>
-            </div>
-
-            <nav className="hidden md:flex items-center space-x-4">
-              <Link
-                to="/"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Home
-              </Link>
-              <Link
-                to="/learning"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Learning
-              </Link>
-              <Link
-                to="/quiz"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Quiz
-              </Link>
-              <Link
-                to="/result"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Results
-              </Link>
-            </nav>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur">
+      <div className="container flex h-16 items-center justify-between px-4">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <GraduationCap className="h-5 w-5" />
           </div>
+          <span className="text-lg font-semibold tracking-tight">
+            LinguaFlow
+          </span>
+        </Link>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center bg-gray-100 border border-transparent hover:border-gray-200 rounded-md px-2 py-1">
-              <Search className="h-4 w-4 text-gray-600" />
-              <input
-                aria-label="Search"
-                placeholder="Search courses, quizzes..."
-                className="ml-2 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
-              />
-            </div>
-
-            <button className="hidden sm:inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">
-              Get started
-            </button>
-
-            <button
-              aria-label="Open user menu"
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200"
+        {/* Navigation */}
+        <nav className="hidden md:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              className={({ isActive }) =>
+                `text-sm font-medium transition-colors ${
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`
+              }
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-600"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+              {link.name}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {user?.name ? (
+            <>
+              <span className="text-sm text-muted-foreground">
+                Hi, <span className="font-medium">{user.name}</span>
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  localStorage.clear();
+                  window.location.href = "/";
+                }}
               >
-                <path d="M10 10a4 4 0 100-8 4 4 0 000 8z" />
-                <path
-                  fillRule="evenodd"
-                  d="M.458 17.042A8 8 0 0116 16H4a4 4 0 01-3.542 1.042z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </div>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/login">Login</Link>
+              </Button>
+
+              <Button size="sm" asChild>
+                <Link to="/">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>

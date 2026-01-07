@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Languages } from "lucide-react";
 
-const language = [
+const languages = [
   { code: "en", name: "English" },
   { code: "es", name: "Spanish" },
   { code: "fr", name: "French" },
@@ -22,21 +24,43 @@ const Home = () => {
   };
 
   return (
-    <div>
-      <h1>Welcome, your language learning journey begins here!</h1>
-      <p>Select a language to start learning:</p>
-      <ul>
-        {language.map((lang) => (
-          <li key={lang.code}>
-            <Button
-              key={lang.code}
-              onClick={() => languageSelectHandler(lang.code)}
-            >
-              {lang.name}
-            </Button>
-          </li>
+    <div className="container mx-auto px-4 py-10">
+      {/* Hero Section */}
+      <div className="mb-10 text-center space-y-3">
+        <div className="flex justify-center">
+          <Languages className="h-10 w-10 text-primary" />
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Start Your Language Learning Journey
+        </h1>
+        <p className="text-muted-foreground max-w-xl mx-auto">
+          Choose a language, learn new words, and test your knowledge with fun
+          quizzes.
+        </p>
+      </div>
+
+      {/* Language Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {languages.map((lang) => (
+          <Card
+            key={lang.code}
+            className="group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
+            onClick={() => languageSelectHandler(lang.code)}
+          >
+            <CardContent className="flex items-center justify-between p-3">
+              <span className="text-base font-medium">{lang.name}</span>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                Start →
+              </Button>
+            </CardContent>
+          </Card>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

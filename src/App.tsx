@@ -2,6 +2,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import Header from "./components/Header";
 import Loader from "./components/Loader";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Footer from "./components/Footer";
 
 const Home = lazy(() => import("./components/Home"));
 const Login = lazy(() => import("./components/Login"));
@@ -17,11 +19,26 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/quiz" element={<Quiz />} />
-          <Route path="/result" element={<Result />} />
+          <Route
+            path="/quiz"
+            element={
+              <ProtectedRoute>
+                <Quiz />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/result"
+            element={
+              <ProtectedRoute>
+                <Result />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/learning" element={<Learning />} />
         </Routes>
       </Suspense>
+      <Footer />
     </BrowserRouter>
   );
 }
